@@ -1,0 +1,1138 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QCM - Stocker et organiser ses données</title>
+    <style>
+        :root {
+            --bg-color: #121212;
+            --card-bg: #1E1E1E;
+            --card-hover: #262626;
+            --text-color: #E0E0E0;
+            --text-muted: #9E9E9E;
+            --accent-color: #DEFF9A;
+            --accent-hover: #c9f578;
+            --correct-color: #4EAE67;
+            --correct-bg: rgba(78, 174, 103, 0.15);
+            --wrong-color: #FF6B6B;
+            --wrong-bg: rgba(255, 107, 107, 0.15);
+            --border-color: #2F2F2F;
+            --border-radius: 14px;
+            --font-stack: system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            font-family: var(--font-stack);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 16px;
+            line-height: 1.5;
+        }
+
+        .quiz-wrapper {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: var(--border-radius);
+            box-shadow: 0 16px 36px rgba(0, 0, 0, 0.6);
+            width: 100%;
+            max-width: 760px;
+            padding: 28px;
+            position: relative;
+        }
+
+        /* En-tête */
+        .quiz-header {
+            margin-bottom: 22px;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 18px;
+        }
+
+        .header-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .tag-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background-color: rgba(222, 255, 154, 0.12);
+            color: var(--accent-color);
+            border: 1px solid rgba(222, 255, 154, 0.25);
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.82rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .score-pill {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            background-color: #121212;
+            padding: 4px 12px;
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+        }
+
+        h1 {
+            font-size: 1.55rem;
+            color: #FFFFFF;
+            font-weight: 700;
+        }
+
+        /* Barre de progression */
+        .progress-section {
+            margin-top: 14px;
+        }
+
+        .progress-info {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.82rem;
+            color: var(--text-muted);
+            font-weight: 600;
+            margin-bottom: 6px;
+        }
+
+        .progress-track {
+            width: 100%;
+            height: 8px;
+            background-color: #121212;
+            border-radius: 6px;
+            overflow: hidden;
+            border: 1px solid var(--border-color);
+        }
+
+        .progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, #A8E85A, var(--accent-color));
+            width: 0%;
+            transition: width 0.3s ease;
+            border-radius: 6px;
+        }
+
+        /* Zone de question */
+        .question-card {
+            margin: 20px 0;
+        }
+
+        .question-number {
+            font-size: 0.85rem;
+            color: var(--accent-color);
+            font-weight: 700;
+            margin-bottom: 6px;
+            text-transform: uppercase;
+        }
+
+        .question-title {
+            font-size: 1.18rem;
+            color: #FFFFFF;
+            font-weight: 600;
+            margin-bottom: 18px;
+            line-height: 1.4;
+        }
+
+        /* Grille des réponses */
+        .options-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .option-button {
+            background-color: #232323;
+            border: 1.5px solid #333333;
+            border-radius: 10px;
+            color: var(--text-color);
+            padding: 14px 16px;
+            font-size: 0.98rem;
+            text-align: left;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            font-family: inherit;
+        }
+
+        .option-button:hover:not(:disabled) {
+            background-color: var(--card-hover);
+            border-color: var(--accent-color);
+            transform: translateX(4px);
+        }
+
+        .option-button:disabled {
+            cursor: default;
+        }
+
+        .option-button.correct {
+            background-color: var(--correct-bg);
+            border-color: var(--correct-color);
+            color: #FFFFFF;
+            font-weight: 600;
+        }
+
+        .option-button.correct::after {
+            content: "✓";
+            color: var(--correct-color);
+            font-size: 1.2rem;
+            font-weight: bold;
+        }
+
+        .option-button.wrong {
+            background-color: var(--wrong-bg);
+            border-color: var(--wrong-color);
+            color: #FFFFFF;
+        }
+
+        .option-button.wrong::after {
+            content: "✕";
+            color: var(--wrong-color);
+            font-size: 1.2rem;
+            font-weight: bold;
+        }
+
+        .option-button.dimmed {
+            opacity: 0.45;
+        }
+
+        /* Feedback */
+        .feedback-container {
+            margin-top: 18px;
+            padding: 14px 16px;
+            border-radius: 8px;
+            display: none;
+            animation: fadeIn 0.25s ease;
+        }
+
+        .feedback-container.correct {
+            background-color: var(--correct-bg);
+            border-left: 4px solid var(--correct-color);
+        }
+
+        .feedback-container.wrong {
+            background-color: var(--wrong-bg);
+            border-left: 4px solid var(--wrong-color);
+        }
+
+        .feedback-title {
+            font-size: 0.95rem;
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+
+        .feedback-container.correct .feedback-title {
+            color: var(--correct-color);
+        }
+
+        .feedback-container.wrong .feedback-title {
+            color: var(--wrong-color);
+        }
+
+        .feedback-text {
+            font-size: 0.9rem;
+            color: var(--text-color);
+            line-height: 1.45;
+        }
+
+        /* Actions */
+        .actions-row {
+            margin-top: 22px;
+            display: flex;
+            justify-content: flex-end;
+        }
+
+        .btn-action {
+            background-color: var(--accent-color);
+            color: #121212;
+            border: none;
+            border-radius: 8px;
+            padding: 12px 24px;
+            font-size: 0.95rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-family: inherit;
+        }
+
+        .btn-action:hover:not(:disabled) {
+            background-color: var(--accent-hover);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 14px rgba(222, 255, 154, 0.25);
+        }
+
+        .btn-action:disabled {
+            background-color: #2D2D2D;
+            color: #666666;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        /* Écran des résultats */
+        .results-view {
+            text-align: center;
+            padding: 10px 0;
+            display: none;
+            animation: fadeIn 0.35s ease;
+        }
+
+        .score-circle-wrapper {
+            position: relative;
+            width: 150px;
+            height: 150px;
+            margin: 0 auto 20px auto;
+            border-radius: 50%;
+            background: #171717;
+            border: 4px solid var(--accent-color);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            box-shadow: 0 0 24px rgba(222, 255, 154, 0.15);
+        }
+
+        .score-val {
+            font-size: 2.6rem;
+            font-weight: 800;
+            color: var(--accent-color);
+            line-height: 1;
+        }
+
+        .score-sub {
+            font-size: 0.78rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            font-weight: 700;
+            margin-top: 4px;
+        }
+
+        .results-view h2 {
+            font-size: 1.5rem;
+            color: #FFFFFF;
+            margin-bottom: 10px;
+        }
+
+        .result-description {
+            font-size: 0.98rem;
+            color: var(--text-color);
+            max-width: 580px;
+            margin: 0 auto 24px auto;
+            line-height: 1.5;
+        }
+
+        .summary-stats {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+            max-width: 360px;
+            margin: 0 auto 24px auto;
+        }
+
+        .stat-box {
+            background-color: #151515;
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            padding: 12px;
+        }
+
+        .stat-num {
+            font-size: 1.3rem;
+            font-weight: 700;
+        }
+
+        .stat-num.succ { color: var(--correct-color); }
+        .stat-num.err { color: var(--wrong-color); }
+
+        .stat-label {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            margin-top: 2px;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(8px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @media (max-width: 600px) {
+            .quiz-wrapper {
+                padding: 18px;
+            }
+            h1 {
+                font-size: 1.3rem;
+            }
+            .question-title {
+                font-size: 1.05rem;
+            }
+            .option-button {
+                padding: 12px 14px;
+                font-size: 0.9rem;
+            }
+            .score-circle-wrapper {
+                width: 130px;
+                height: 130px;
+            }
+            .score-val {
+                font-size: 2.2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="quiz-wrapper">
+        <!-- VUE DU QUESTIONNAIRE -->
+        <div id="quiz-view">
+            <div class="quiz-header">
+                <div class="header-top">
+                    <span class="tag-badge">📁 Organisation & Stockage</span>
+                    <span class="score-pill" id="live-score">Score: 0 / 40</span>
+                </div>
+                <h1>Stocker et organiser ses données</h1>
+                <div class="progress-section">
+                    <div class="progress-info">
+                        <span>Progression</span>
+                        <span id="progress-text">Question 1 sur 40</span>
+                    </div>
+                    <div class="progress-track">
+                        <div class="progress-bar" id="progress-bar"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="question-card">
+                <div class="question-number" id="question-index-label">Question 1</div>
+                <div class="question-title" id="question-text">Chargement de la question...</div>
+                <div class="options-list" id="options-container">
+                    <!-- Boutons d'options générés en JS -->
+                </div>
+            </div>
+
+            <div class="feedback-container" id="feedback-box">
+                <div class="feedback-title" id="feedback-title">Bonne réponse !</div>
+                <div class="feedback-text" id="feedback-desc">Explication pédagogique...</div>
+            </div>
+
+            <div class="actions-row">
+                <button class="btn-action" id="next-btn" disabled>Question suivante ➔</button>
+            </div>
+        </div>
+
+        <!-- VUE DES RÉSULTATS -->
+        <div class="results-view" id="results-view">
+            <span class="tag-badge" style="margin-bottom: 14px;">Bilan Pédagogique</span>
+            
+            <div class="score-circle-wrapper">
+                <div class="score-val" id="final-percent">0%</div>
+                <div class="score-sub">Score Final</div>
+            </div>
+
+            <h2 id="result-title-text">Niveau de maîtrise</h2>
+            <p class="result-description" id="result-desc-text">Commentaire personnalisé...</p>
+
+            <div class="summary-stats">
+                <div class="stat-box">
+                    <div class="stat-num succ" id="stat-correct-count">0</div>
+                    <div class="stat-label">Réponses justes</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-num err" id="stat-wrong-count">0</div>
+                    <div class="stat-label">Erreurs commises</div>
+                </div>
+            </div>
+
+            <button class="btn-action" onclick="restartQuiz()">🔄 Recommencer l'évaluation</button>
+        </div>
+    </div>
+
+    <script>
+        // BANQUE DE 40 QUESTIONS BASÉE STRICTEMENT SUR LE COURS
+        const rawQuestions = [
+            // Slide 2 : Analogie de la chambre & Pourquoi organiser
+            {
+                q: "D'après l'analogie de la chambre présentée dans le cours, que se passe-t-il si tout est jeté au sol ?",
+                options: [
+                    "Rien ne se retrouve et on perd du temps",
+                    "L'ordinateur fonctionne beaucoup plus rapidement",
+                    "Les fichiers se rangent automatiquement",
+                    "Les documents sont protégés des virus"
+                ],
+                answer: 0,
+                feedback: "Tout comme dans une chambre en désordre où rien ne se retrouve si tout est au sol, un ordinateur non rangé fait perdre un temps précieux."
+            },
+            {
+                q: "Quel est l'objectif principal d'une bonne organisation de ses fichiers informatiques ?",
+                options: [
+                    "Retrouver ses documents immédiatement sans perdre de temps",
+                    "Pouvoir changer la couleur de son fond d'écran",
+                    "Augmenter la vitesse de connexion Internet",
+                    "Supprimer automatiquement tous les devoirs terminés"
+                ],
+                answer: 0,
+                feedback: "On organise ses fichiers pour pouvoir retrouver n'importe quel travail instantanément dès qu'on en a besoin."
+            },
+
+            // Slide 3 : Qu'est-ce qu'une donnée numérique ?
+            {
+                q: "Qu'est-ce qu'une « donnée numérique » selon le cours ?",
+                options: [
+                    "N'importe quel contenu enregistré sur un ordinateur ou une tablette",
+                    "Uniquement un devoir rédigé sur feuille blanche",
+                    "Le mot de passe de l'ordinateur du collège",
+                    "Le câble qui relie l'ordinateur à la prise électrique"
+                ],
+                answer: 0,
+                feedback: "Une donnée numérique est tout contenu enregistré sur un support numérique : textes, photos, vidéos, sons..."
+            },
+            {
+                q: "Parmi ces propositions, lequel est un exemple de donnée numérique de type sonore ?",
+                options: [
+                    "Un fichier musique .mp3",
+                    "Un fichier texte .docx",
+                    "Un dessin .png",
+                    "Un classeur bleu"
+                ],
+                answer: 0,
+                feedback: "Le fichier .mp3 est un format de fichier audio (musique/son), donc une donnée numérique sonore."
+            },
+            {
+                q: "Les photos, dessins, devoirs écrits, musiques et vidéos sont tous des exemples de :",
+                options: [
+                    "Données numériques enregistrables",
+                    "Périphériques d'entrée",
+                    "Systèmes d'exploitation",
+                    "Câbles réseau"
+                ],
+                answer: 0,
+                feedback: "Tous ces éléments sont des formes variées de données numériques que l'on manipule au quotidien."
+            },
+
+            // Slide 5 : Fichier vs Dossier
+            {
+                q: "Dans l'univers informatique, que représente « Le Fichier » ?",
+                options: [
+                    "Le contenu (votre document de travail avec nom et extension)",
+                    "Le meuble où est posé l'ordinateur",
+                    "Le conteneur qui stocke uniquement des dossiers vides",
+                    "L'écran de l'ordinateur"
+                ],
+                answer: 0,
+                feedback: "Le fichier est le contenu lui-même (texte, image, son), identifié par un nom et une extension."
+            },
+            {
+                q: "Que représente « Le Dossier » dans l'organisation numérique ?",
+                options: [
+                    "Le conteneur (comme un classeur ou une pochette pour regrouper des fichiers)",
+                    "Une feuille contenant obligatoirement du texte rédigé",
+                    "Une clé USB physique branchée sur l'ordinateur",
+                    "Un logiciel payant de traitement de texte"
+                ],
+                answer: 0,
+                feedback: "Le dossier est un conteneur : il ne contient pas directement de texte rédigé, mais regroupe des fichiers pour maintenir l'ordre."
+            },
+            {
+                q: "Quelle est la différence fondamentale entre un fichier et un dossier ?",
+                options: [
+                    "Le fichier contient la donnée (contenu), le dossier sert de rangement (conteneur)",
+                    "Le dossier a une extension .mp3, pas le fichier",
+                    "Le fichier peut contenir des dossiers complets",
+                    "Un dossier est obligatoirement imprimé sur papier"
+                ],
+                answer: 0,
+                feedback: "Le fichier est le document de travail (contenu), tandis que le dossier est le classeur de rangement (conteneur)."
+            },
+            {
+                q: "À quoi sert l'extension située à la fin du nom d'un fichier (ex: .docx, .png) ?",
+                options: [
+                    "Elle indique la nature et le type de document",
+                    "Elle indique le prix d'achat du fichier",
+                    "Elle donne l'adresse postale de l'auteur",
+                    "Elle verrouille définitivement le fichier"
+                ],
+                answer: 0,
+                feedback: "L'extension (comme .pdf, .docx, .png) permet au système d'exploitation de reconnaître le type et le format du fichier."
+            },
+
+            // Slide 6 : L'Arborescence informatique
+            {
+                q: "Comment est structurée une « Arborescence informatique » ?",
+                options: [
+                    "Des dossiers dans des dossiers, organisés comme les branches d'un arbre",
+                    "Une liste continue de fichiers sans aucun dossier",
+                    "Un ensemble de fenêtres ouvertes en même temps sur l'écran",
+                    "Un tableau de notes avec lignes et colonnes"
+                ],
+                answer: 0,
+                feedback: "L'arborescence est une structure hiérarchique où les dossiers s'emboîtent comme les branches d'un arbre."
+            },
+            {
+                q: "Dans le chemin `Mes Documents > Classe_6eme > Technologie > Projet_1.pdf`, que représente `Technologie` ?",
+                options: [
+                    "Un sous-dossier situé dans `Classe_6eme`",
+                    "Le fichier de travail final",
+                    "Le nom du logiciel utilisé",
+                    "Le nom du serveur du collège"
+                ],
+                answer: 0,
+                feedback: "`Technologie` est un sous-dossier contenu dans le dossier parent `Classe_6eme`."
+            },
+            {
+                q: "Dans l'arborescence `Mes Documents > Classe_6eme > Technologie > Projet_1.pdf`, quel élément est le fichier final ?",
+                options: [
+                    "Projet_1.pdf",
+                    "Mes Documents",
+                    "Classe_6eme",
+                    "Technologie"
+                ],
+                answer: 0,
+                feedback: "`Projet_1.pdf` possède une extension (.pdf) : c'est le document de travail final contenu dans le dossier Technologie."
+            },
+
+            // Slide 7 : L'art de bien nommer ses fichiers
+            {
+                q: "Pourquoi devez-vous éviter de nommer un fichier `doc1.docx` ou `sans_titre.png` ?",
+                options: [
+                    "Parce qu'on ne sait pas de quoi il s'agit sans devoir l'ouvrir",
+                    "Parce que l'ordinateur refusera d'enregistrer ce nom",
+                    "Parce que ce type de nom efface le disque dur",
+                    "Parce que le fichier sera automatiquement converti en vidéo"
+                ],
+                answer: 0,
+                feedback: "Des noms flous comme `doc1.docx` obligent à ouvrir tous les fichiers pour savoir ce qu'ils contiennent, ce qui fait perdre du temps."
+            },
+            {
+                q: "Parmi les propositions suivantes, quel est un nom de fichier clair et recommandé ?",
+                options: [
+                    "Exo1_Techno_15Sept.pdf",
+                    "truc_maths.pdf",
+                    "sans_titre.png",
+                    "devoir.docx"
+                ],
+                answer: 0,
+                feedback: "`Exo1_Techno_15Sept.pdf` est un nom idéal car il précise la matière, l'exercice et la date."
+            },
+            {
+                q: "Que doit toujours préciser un nom de fichier bien conçu selon le cours ?",
+                options: [
+                    "Le sujet et l'auteur / la matière ou la date",
+                    "Le modèle de l'ordinateur",
+                    "Le mot de passe de la session",
+                    "L'adresse du collège"
+                ],
+                answer: 0,
+                feedback: "Un bon nom indique précisément le sujet, la matière, la date ou le prénom de l'élève (ex: `Exo_Maths_Léa.docx`)."
+            },
+
+            // Slide 8 : Le Gestionnaire de Fichiers
+            {
+                q: "Quelles sont les trois fonctions majeures d'un Gestionnaire de Fichiers présentées dans le cours ?",
+                options: [
+                    "Explorer, Organiser, Trier & Filtrer",
+                    "Imprimer, Peindre, Naviguer",
+                    "Calculer, Dessiner, Téléphoner",
+                    "Écouter, Regarder, Scanner"
+                ],
+                answer: 0,
+                feedback: "Le gestionnaire de fichiers permet d'Explorer (naviguer), Organiser (déplacer, renommer...) et Trier/Filtrer."
+            },
+            {
+                q: "Dans le gestionnaire de fichiers, que permet la fonction « Organiser » ?",
+                options: [
+                    "Copier, coller, déplacer, renommer ou supprimer des fichiers",
+                    "Naviguer sur les réseaux sociaux",
+                    "Modifier le texte d'un document Word sans l'ouvrir",
+                    "Acheter une nouvelle clé USB en ligne"
+                ],
+                answer: 0,
+                feedback: "Organiser consiste à structurer ses documents : copier, coller, déplacer, renommer ou supprimer."
+            },
+            {
+                q: "Comment la fonction « Trier & Filtrer » aide-t-elle l'élève à retrouver un document ?",
+                options: [
+                    "En classant les fichiers par date, nom ou taille",
+                    "En créant des copies automatiques toutes les minutes",
+                    "En lisant le texte à voix haute",
+                    "En supprimant les documents les plus lourds"
+                ],
+                answer: 0,
+                feedback: "Trier par date récente, par nom alphabétique ou par taille permet de retrouver un document en un éclair."
+            },
+
+            // Slide 10 : Le Cloud (Stockage en ligne)
+            {
+                q: "Qu'est-ce que le « Cloud » (stockage en ligne) ?",
+                options: [
+                    "Des fichiers enregistrés sur des serveurs sécurisés accessibles par Internet",
+                    "Des données qui voyagent dans les nuages météo",
+                    "Une clé USB branchée en permanence sur son écran",
+                    "Un disque dur externe enfermé dans un coffre-fort physique"
+                ],
+                answer: 0,
+                feedback: "Le Cloud désigne des serveurs distants et sécurisés qui hébergent vos fichiers accessibles via une connexion Internet."
+            },
+            {
+                q: "Parmi les exemples suivants, lequel est un outil de stockage en ligne / Cloud ?",
+                options: [
+                    "Google Drive ou l'ENT du collège",
+                    "Une feuille de classeur A4",
+                    "Une clé USB 16 Go",
+                    "Un lecteur de carte SD"
+                ],
+                answer: 0,
+                feedback: "Google Drive et l'espace documentaire de l'ENT du collège sont des solutions de stockage Cloud en ligne."
+            },
+            {
+                q: "Quel est le grand avantage du Cloud pour la continuité du travail scolaire ?",
+                options: [
+                    "On peut commencer un devoir en classe et le terminer à la maison sans transporter de clé USB",
+                    "L'ordinateur n'a plus besoin d'électricité",
+                    "Les devoirs sont corrigés automatiquement à 100%",
+                    "Il n'est plus nécessaire d'avoir un compte utilisateur"
+                ],
+                answer: 0,
+                feedback: "Le Cloud offre la disponibilité partout : vos documents sont accessibles depuis n'importe quel appareil connecté."
+            },
+            {
+                q: "Que permet le travail collaboratif sur le Cloud ?",
+                options: [
+                    "Plusieurs élèves peuvent écrire et travailler ensemble sur le même document",
+                    "Chaque élève reçoit une clé USB identique",
+                    "L'ordinateur travaille à la place des élèves",
+                    "Le professeur ne peut plus voir qui a rédigé le texte"
+                ],
+                answer: 0,
+                feedback: "Le travail collaboratif permet à plusieurs utilisateurs de modifier simultanément un même fichier partagé."
+            },
+
+            // Slide 11 : Le Match Local vs En ligne
+            {
+                q: "Quel est le principal avantage du stockage LOCAL (clé USB, disque dur) ?",
+                options: [
+                    "Il ne nécessite aucune connexion Internet pour fonctionner",
+                    "Il est impossible de perdre ou casser sa clé USB",
+                    "Il se sauvegarde automatiquement en cas d'incendie",
+                    "Il permet le travail simultané à 30 élèves"
+                ],
+                answer: 0,
+                feedback: "Le stockage local fonctionne partout et tout le temps, même sans la moindre connexion Internet."
+            },
+            {
+                q: "Quel risque majeur menace le stockage sur support local comme une clé USB ?",
+                options: [
+                    "La perte physique, le vol ou la casse de la clé",
+                    "L'impossibilité de brancher la clé sur un port USB",
+                    "L'obligation de payer un abonnement mensuel à chaque clic",
+                    "Le piratage des satellites spatiaux"
+                ],
+                answer: 0,
+                feedback: "Une clé USB peut facilement s'égarer, être oubliée au collège ou s'endommager physiquement."
+            },
+            {
+                q: "Quelle condition est indispensable pour accéder à ses documents sur le Cloud ?",
+                options: [
+                    "Disposer d'une connexion Internet",
+                    "Avoir branché une clé USB spécifique",
+                    "Être obligatoirement présent au collège",
+                    "Avoir une imprimante connectée"
+                ],
+                answer: 0,
+                feedback: "Pour joindre les serveurs du Cloud, une connexion Internet (Wi-Fi, câble ou 4G/5G) est indispensable."
+            },
+            {
+                q: "Pourquoi le travail à plusieurs est-il difficile avec une clé USB ordinaire ?",
+                options: [
+                    "Parce qu'un seul élève à la fois peut brancher et modifier le document",
+                    "Parce qu'une clé USB ne peut stocker qu'un seul fichier",
+                    "Parce que la clé USB efface les mots des autres élèves",
+                    "Parce que les clés USB ne fonctionnent qu'avec les souris"
+                ],
+                answer: 0,
+                feedback: "Une clé USB physique ne se branche que sur un seul poste à la fois, rendant la collaboration complexe."
+            },
+
+            // Slide 13 : Tableur vs Base de Données
+            {
+                q: "Comment un Tableur (Classeur) organise-t-il les informations ?",
+                options: [
+                    "En lignes et en colonnes pour traiter des calculs et informations simples",
+                    "Sous forme d'une arborescence de dossiers imbriqués",
+                    "Dans une vidéo interactive",
+                    "Uniquement sous forme de fichiers sons"
+                ],
+                answer: 0,
+                feedback: "Le tableur organise les données dans une grille de cellules réparties en lignes et en colonnes."
+            },
+            {
+                q: "Quel exemple illustre parfaitement l'usage d'un Tableur (Classeur) ?",
+                options: [
+                    "Calculer la moyenne des notes d'un trimestre",
+                    "Gérer le prêt de 10 000 livres du CDI avec leurs emprunteurs",
+                    "Écouter de la musique en streaming",
+                    "Dessiner un plan en 3D pour la technologie"
+                ],
+                answer: 0,
+                feedback: "Calculer des sommes ou des moyennes de notes est l'exemple classique d'application d'un tableur."
+            },
+            {
+                q: "Qu'est-ce qu'une « Base de Données » ?",
+                options: [
+                    "Une immense collection d'informations interconnectées gérant de gros volumes de données",
+                    "Un fichier texte avec une seule ligne de titre",
+                    "Le dossier principal de la corbeille de l'ordinateur",
+                    "Un câble reliant deux écrans d'ordinateur"
+                ],
+                answer: 0,
+                feedback: "Une base de données est un système capable de gérer d'immenses collections d'informations reliées entre elles."
+            },
+            {
+                q: "Dans le cours, quel est l'exemple concret donné pour illustrer une Base de Données ?",
+                options: [
+                    "Le logiciel du CDI qui gère des milliers de livres, d'auteurs et d'emprunts en direct",
+                    "Un fichier Bloc-notes contenant une liste de courses",
+                    "Une photo de classe enregistrée en .png",
+                    "Un fond d'écran animé"
+                ],
+                answer: 0,
+                feedback: "Le logiciel de gestion du CDI gère simultanément les livres, leurs codes-barres, les auteurs et les élèves emprunteurs."
+            },
+
+            // Slide 14 : Système d'Information (SI) du collège
+            {
+                q: "Quels sont les trois éléments qui composent le Système d'Information (SI) du collège ?",
+                options: [
+                    "Données, Utilisateurs, Outils",
+                    "Écrans, Claviers, Souris",
+                    "Livres, Cahiers, Stylos",
+                    "Directeur, Secrétaire, Gardien"
+                ],
+                answer: 0,
+                feedback: "Le SI repose sur le triangle : les Données, les Utilisateurs et les Outils numériques."
+            },
+            {
+                q: "Dans le Système d'Information du collège, que retrouve-t-on dans la catégorie « Données » ?",
+                options: [
+                    "Notes, emplois du temps, absences, fiches élèves",
+                    "L'ENT et le réseau informatique",
+                    "Les professeurs et la direction",
+                    "Les câbles électriques et les routeurs"
+                ],
+                answer: 0,
+                feedback: "Les données correspondent à l'ensemble des informations administratives et scolaires stockées."
+            },
+            {
+                q: "Dans le Système d'Information du collège, qui fait partie des « Utilisateurs » ?",
+                options: [
+                    "Élèves, parents, professeurs et direction",
+                    "Les disques durs et serveurs du collège",
+                    "Les bulletins de notes imprimés",
+                    "Les câbles fibre optique"
+                ],
+                answer: 0,
+                feedback: "Les utilisateurs sont l'ensemble des personnes humaines qui consultent ou alimentent le système."
+            },
+            {
+                q: "Dans le Système d'Information du collège, à quelle catégorie appartiennent l'ENT et les ordinateurs ?",
+                options: [
+                    "Aux Outils",
+                    "Aux Données",
+                    "Aux Utilisateurs",
+                    "Aux Matières scolaires"
+                ],
+                answer: 0,
+                feedback: "L'ENT, le réseau informatique et les ordinateurs constituent les Outils du Système d'Information."
+            },
+
+            // Slide 15 : Les 4 règles d'or du rangement numérique
+            {
+                q: "Quelle est la règle d'or n°1 concernant le nommage des fichiers ?",
+                options: [
+                    "Utiliser un nom clair avec la date et la matière (ex: 2023-10-25_Devoir_Maths.pdf)",
+                    "Mettre le nom le plus court possible comme `a.pdf`",
+                    "Écrire le nom en majuscules avec des symboles interdits",
+                    "Ne jamais donner de nom aux fichiers"
+                ],
+                answer: 0,
+                feedback: "Règle 1 : Un nommage clair intégrant la date, la matière et le sujet permet un classement parfait."
+            },
+            {
+                q: "Que préconise la règle d'or n°2 concernant le « Bureau » de l'ordinateur ?",
+                options: [
+                    "Ne pas stocker tous ses fichiers en vrac sur l'écran d'accueil",
+                    "Remplir tout l'écran d'accueil avec des raccourcis",
+                    "Changer d'ordinateur dès que le bureau est plein",
+                    "Masquer le bureau sous une image noire"
+                ],
+                answer: 0,
+                feedback: "Règle 2 : Le bureau n'est pas un lieu de stockage permanent. Il faut ranger les documents dans l'arborescence."
+            },
+            {
+                q: "Selon la règle d'or n°3 « Sauvegardes », quelle bonne habitude faut-il adopter ?",
+                options: [
+                    "Conserver une copie de ses fichiers importants sur un second support (Cloud ou clé USB)",
+                    "Supprimer le fichier original dès qu'il est terminé",
+                    "Garder un seul fichier unique sur l'ordinateur du collège",
+                    "Imprimer tous ses fichiers 5 fois sur papier"
+                ],
+                answer: 0,
+                feedback: "Règle 3 : Avoir une sauvegarde sur un 2e support (Cloud ou clé) protège de toute panne matérielle."
+            },
+            {
+                q: "En quoi consiste la règle d'or n°4 « Nettoyage » ?",
+                options: [
+                    "Supprimer régulièrement les doublons et les brouillons inutiles",
+                    "Laver le clavier avec de l'eau et du savon",
+                    "Effacer le dossier Technologie_6eme chaque semaine",
+                    "Créer 10 copies de chaque image"
+                ],
+                answer: 0,
+                feedback: "Règle 4 : Le nettoyage régulier évite d'encombrer l'espace disque avec des brouillons périmés."
+            },
+
+            // Slide 16 : L'impact écologique du stockage
+            {
+                q: "Quelle part impressionnante d'énergie est consommée par les Data Centers selon le cours ?",
+                options: [
+                    "80%",
+                    "10%",
+                    "30%",
+                    "99%"
+                ],
+                answer: 0,
+                feedback: "Les Data Centers représentent environ 80% de l'énergie consommée pour faire tourner et refroidir les serveurs."
+            },
+            {
+                q: "Pourquoi le stockage numérique a-t-il un impact écologique et pollue-t-il ?",
+                options: [
+                    "Parce que les serveurs tournent jour et nuit et nécessitent beaucoup d'électricité et de climatisation",
+                    "Parce que les câbles d'ordinateurs rejettent de la fumée noire",
+                    "Parce que les écrans consomment du carburant essence",
+                    "Parce que les clés USB sont radioactives"
+                ],
+                answer: 0,
+                feedback: "Les centres de données (Data Centers) fonctionnent 24h/24 et nécessitent d'immenses quantités d'électricité."
+            },
+            {
+                q: "Parmi les propositions suivantes, lequel est un geste éco-numérique recommandé dans le cours ?",
+                options: [
+                    "Supprimer ses vieux e-mails et vider régulièrement sa corbeille",
+                    "Envoyer le même fichier 20 fois par messagerie",
+                    "Garder tous les brouillons vidéo sur le Cloud",
+                    "Laisser son écran allumé toute la nuit"
+                ],
+                answer: 0,
+                feedback: "Supprimer les vieux mails, vider sa corbeille et supprimer les fichiers inutiles réduisent l'empreinte carbone."
+            },
+
+            // Slide 17 : Mission pratique
+            {
+                q: "Lors de la mission pratique en classe, quel dossier devez-vous créer dans votre espace personnel ?",
+                options: [
+                    "Technologie_6eme",
+                    "Jeux_Video_2024",
+                    "Fichiers_Inconnus",
+                    "Poubelle_Provisoire"
+                ],
+                answer: 0,
+                feedback: "La consigne pratique demande de créer un dossier structuré nommé `Technologie_6eme` dans son espace personnel."
+            }
+        ];
+
+        // GESTION DE L'ÉTAT DU QUIZ
+        let questions = [];
+        let currentIndex = 0;
+        let score = 0;
+        let isAnswered = false;
+
+        // ÉLÉMENTS DU DOM
+        const quizView = document.getElementById('quiz-view');
+        const resultsView = document.getElementById('results-view');
+        const questionText = document.getElementById('question-text');
+        const questionIndexLabel = document.getElementById('question-index-label');
+        const optionsContainer = document.getElementById('options-container');
+        const progressBar = document.getElementById('progress-bar');
+        const progressText = document.getElementById('progress-text');
+        const liveScore = document.getElementById('live-score');
+        const feedbackBox = document.getElementById('feedback-box');
+        const feedbackTitle = document.getElementById('feedback-title');
+        const feedbackDesc = document.getElementById('feedback-desc');
+        const nextBtn = document.getElementById('next-btn');
+
+        // ALGORITHME DE SHUFFLE (FISHER-YATES)
+        function shuffleArray(arr) {
+            const copy = [...arr];
+            for (let i = copy.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [copy[i], copy[j]] = [copy[j], copy[i]];
+            }
+            return copy;
+        }
+
+        // INITIALISATION
+        function initQuiz() {
+            // Mélanger l'ordre des questions ET l'ordre de leurs options
+            questions = shuffleArray(rawQuestions).map(q => {
+                const mappedOptions = q.options.map((optText, originalIndex) => ({
+                    text: optText,
+                    isCorrect: originalIndex === q.answer
+                }));
+                return {
+                    q: q.q,
+                    options: shuffleArray(mappedOptions),
+                    feedback: q.feedback
+                };
+            });
+
+            currentIndex = 0;
+            score = 0;
+            isAnswered = false;
+
+            quizView.style.display = 'block';
+            resultsView.style.display = 'none';
+            liveScore.innerText = `Score: 0 / ${questions.length}`;
+
+            renderQuestion();
+        }
+
+        // AFFICHAGE D'UNE QUESTION
+        function renderQuestion() {
+            isAnswered = false;
+            nextBtn.disabled = true;
+            feedbackBox.style.display = 'none';
+
+            const total = questions.length;
+            const currentNum = currentIndex + 1;
+            const qData = questions[currentIndex];
+
+            // Progression
+            progressText.innerText = `Question ${currentNum} sur ${total}`;
+            questionIndexLabel.innerText = `Question ${currentNum} / ${total}`;
+            progressBar.style.width = `${(currentNum / total) * 100}%`;
+
+            // Intitulé
+            questionText.innerText = qData.q;
+
+            // Options
+            optionsContainer.innerHTML = '';
+            qData.options.forEach((opt, idx) => {
+                const btn = document.createElement('button');
+                btn.className = 'option-button';
+                btn.innerText = opt.text;
+                btn.onclick = () => handleSelectOption(idx, opt.isCorrect);
+                optionsContainer.appendChild(btn);
+            });
+
+            // Texte du bouton d'action
+            if (currentIndex === total - 1) {
+                nextBtn.innerText = "Terminer le test ➔";
+            } else {
+                nextBtn.innerText = "Question suivante ➔";
+            }
+        }
+
+        // GESTION DU CLIC SUR UNE RÉPONSE
+        function handleSelectOption(selectedIdx, isCorrect) {
+            if (isAnswered) return; // Empêche toute modification ultérieure
+            isAnswered = true;
+
+            const buttons = optionsContainer.querySelectorAll('.option-button');
+            const qData = questions[currentIndex];
+
+            // Verrouiller tous les boutons et appliquer les styles de correction
+            buttons.forEach((btn, idx) => {
+                btn.disabled = true;
+                if (qData.options[idx].isCorrect) {
+                    btn.classList.add('correct');
+                } else if (idx === selectedIdx) {
+                    btn.classList.add('wrong');
+                } else {
+                    btn.classList.add('dimmed');
+                }
+            });
+
+            // Mise à jour du score
+            if (isCorrect) {
+                score++;
+                feedbackBox.className = 'feedback-container correct';
+                feedbackTitle.innerText = "✓ Bonne réponse !";
+            } else {
+                feedbackBox.className = 'feedback-container wrong';
+                feedbackTitle.innerText = "✕ Mauvaise réponse !";
+            }
+
+            liveScore.innerText = `Score: ${score} / ${questions.length}`;
+            feedbackDesc.innerText = qData.feedback;
+            feedbackBox.style.display = 'block';
+
+            nextBtn.disabled = false;
+        }
+
+        // QUESTION SUIVANTE
+        nextBtn.addEventListener('click', () => {
+            if (currentIndex < questions.length - 1) {
+                currentIndex++;
+                renderQuestion();
+            } else {
+                showResults();
+            }
+        });
+
+        // BILAN FINAL
+        function showResults() {
+            quizView.style.display = 'none';
+            resultsView.style.display = 'block';
+
+            const total = questions.length;
+            const percent = Math.round((score / total) * 100);
+
+            document.getElementById('final-percent').innerText = `${percent}%`;
+            document.getElementById('stat-correct-count').innerText = score;
+            document.getElementById('stat-wrong-count').innerText = total - score;
+
+            const titleEl = document.getElementById('result-title-text');
+            const descEl = document.getElementById('result-desc-text');
+
+            if (percent >= 90) {
+                titleEl.innerText = "🏆 Expert Absolu du Numérique !";
+                descEl.innerText = "Félicitations ! Tu maîtrises parfaitement l'organisation des fichiers, l'arborescence, le Cloud, les bases de données et les règles d'éco-responsabilité. Tes dossiers sont impeccables !";
+            } else if (percent >= 75) {
+                titleEl.innerText = "⭐ Gestionnaire Confirmé";
+                descEl.innerText = "Très bon score ! Tu as acquis d'excellents réflexes pour ranger tes documents au collège comme à la maison et faire la différence entre Cloud et stockage local.";
+            } else if (percent >= 50) {
+                titleEl.innerText = "📁 Apprenti Organisateur";
+                descEl.innerText = "C'est un bon début ! Tu as compris les bases du rangement, mais attention à bien mémoriser les 4 règles d'or (nommage, sauvegardes, nettoyage) et le fonctionnement du Système d'Information.";
+            } else {
+                titleEl.innerText = "⚠️ Attention au Désordre Numérique";
+                descEl.innerText = "Ton bureau d'ordinateur ressemble un peu à une chambre où tout est par terre ! Relis bien le cours, revois la différence entre fichier et dossier, et retente ta chance.";
+            }
+        }
+
+        // REDÉMARRAGE
+        function restartQuiz() {
+            initQuiz();
+        }
+
+        // Démarrage automatique au chargement
+        window.addEventListener('DOMContentLoaded', initQuiz);
+    </script>
+</body>
+</html>
